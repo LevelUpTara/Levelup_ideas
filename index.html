@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LevelUp Ideas</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --crimson: #6B1A2A;
+    --crimson-deep: #4A0F1C;
+    --blush: #E8C4C4;
+    --blush-light: #F5E8E8;
+    --chartreuse: #C8D44E;
+    --cream: #FAF6F1;
+    --text: #2A1A1F;
+    --text-muted: #7A5A62;
+    --border: rgba(107,26,42,0.12);
+    --card-bg: #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: var(--crimson-deep);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--chartreuse);
+  }
+
+  .header-left h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    color: var(--blush-light);
+    letter-spacing: 0.01em;
+    line-height: 1;
+  }
+
+  .header-left h1 span {
+    color: var(--chartreuse);
+  }
+
+  .header-left p {
+    font-size: 0.78rem;
+    color: var(--blush);
+    margin-top: 5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  .idea-count {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    color: var(--chartreuse);
+    line-height: 1;
+  }
+
+  .idea-count-label {
+    font-size: 0.7rem;
+    color: var(--blush);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: right;
+    margin-top: 2px;
+  }
+
+  /* Capture area */
+  .capture-zone {
+    padding: 28px 40px;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 20px rgba(107,26,42,0.07);
+  }
+
+  .capture-inner {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .capture-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  textarea {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    resize: none;
+    background: var(--blush-light);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    line-height: 1.6;
+  }
+
+  textarea:focus {
+    border-color: var(--crimson);
+    box-shadow: 0 0 0 3px rgba(107,26,42,0.08);
+    background: white;
+  }
+
+  textarea::placeholder {
+    color: #B8929A;
+    font-style: italic;
+  }
+
+  .capture-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+
+  .char-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .btn-capture {
+    background: var(--crimson);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-capture:hover { background: var(--crimson-deep); }
+  .btn-capture:active { transform: scale(0.98); }
+  .btn-capture:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-mic {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 14px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    transition: all 0.15s;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+
+  .btn-mic:hover { border-color: var(--crimson); color: var(--crimson); }
+
+  .btn-mic.listening {
+    background: var(--crimson);
+    border-color: var(--crimson);
+    color: white;
+    animation: micPulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes micPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(107,26,42,0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(107,26,42,0); }
+  }
+
+  .mic-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    display: inline-block;
+  }
+
+  .btn-mic.listening .mic-dot {
+    animation: dotBlink 0.7s ease-in-out infinite alternate;
+  }
+
+  @keyframes dotBlink {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0.4; transform: scale(0.6); }
+  }
+
+  .no-speech-msg {
+    font-size: 0.75rem;
+    color: #B85050;
+    margin-top: 6px;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    padding: 16px 40px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .filter-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-right: 4px;
+    font-weight: 500;
+  }
+
+  .filter-chip {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: white;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+  }
+
+  .filter-chip:hover { border-color: var(--crimson); color: var(--crimson); }
+  .filter-chip.active { background: var(--crimson); border-color: var(--crimson); color: white; font-weight: 500; }
+
+  /* Ideas list */
+  .ideas-container {
+    padding: 0 40px 60px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+
+  .empty-state .big-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.4;
+  }
+
+  .empty-state p {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+  }
+
+  /* Idea card */
+  .idea-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    transition: box-shadow 0.15s, transform 0.15s;
+    animation: slideIn 0.25s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .idea-card:hover {
+    box-shadow: 0 4px 20px rgba(107,26,42,0.09);
+    transform: translateY(-1px);
+  }
+
+  .idea-card.processing {
+    opacity: 0.7;
+    border-style: dashed;
+  }
+
+  .idea-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .idea-text {
+    font-size: 0.97rem;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 12px;
+    white-space: pre-wrap;
+  }
+
+  .idea-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .idea-time {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* Tag colors by category */
+  .tag-content       { background: #EFF4C4; color: #5A6A00; }
+  .tag-business      { background: #F5E0E0; color: #7A1525; }
+  .tag-community     { background: #E8E0F5; color: #4A2080; }
+  .tag-workshop      { background: #E0EFF5; color: #0A4A6A; }
+  .tag-partnership   { background: #E0F5EC; color: #0A5A30; }
+  .tag-product       { background: #FFF0D8; color: #7A4000; }
+  .tag-ops           { background: #F0F0F0; color: #444; }
+  .tag-other         { background: #F5E8E8; color: #6B4040; }
+
+  .ai-insight {
+    margin-top: 10px;
+    padding: 9px 13px;
+    background: var(--blush-light);
+    border-left: 3px solid var(--crimson);
+    border-radius: 0 6px 6px 0;
+    font-size: 0.83rem;
+    color: var(--crimson-deep);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .idea-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding-top: 2px;
+  }
+
+  .btn-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #C8A0A8;
+    font-size: 1rem;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.15s;
+    line-height: 1;
+  }
+
+  .btn-delete:hover { color: var(--crimson); }
+
+  .processing-badge {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* Spinner */
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--blush);
+    border-top-color: var(--crimson);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Date group */
+  .date-group-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 20px 0 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 600px) {
+    .header, .capture-zone, .filter-bar, .ideas-container { padding-left: 20px; padding-right: 20px; }
+    .header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Level<span>Up</span> Ideas</h1>
+    <p>Capture · Organize · Build</p>
+  </div>
+  <div style="text-align:right;">
+    <div class="idea-count" id="ideaCountDisplay">0</div>
+    <div class="idea-count-label">ideas captured</div>
+    <div id="syncStatus" style="font-size:0.68rem;color:var(--blush);margin-top:4px;letter-spacing:0.05em;min-height:14px;"></div>
+  </div>
+</div>
+
+<div class="capture-zone">
+  <div class="capture-inner">
+    <div class="capture-label">What's on your mind?</div>
+    <textarea id="ideaInput" rows="3" placeholder="Dump it here — content idea, business thought, community concept, random spark… just get it out."></textarea>
+    <div class="capture-actions" id="captureActions">
+      <span class="char-hint" id="charHint">Press ⌘↵ to capture · or speak below</span>
+      <div class="btn-row">
+        <button class="btn-mic" id="micBtn" onclick="toggleMic()" title="Speak your idea">
+          <span>🎙</span> <span id="micLabel">Speak</span>
+        </button>
+        <button class="btn-capture" id="captureBtn" onclick="captureIdea()">Capture Idea →</button>
+      </div>
+    </div>
+    <div id="speechError" class="no-speech-msg" style="display:none;"></div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Filter:</span>
+  <button class="filter-chip active" onclick="filterIdeas('all', this)">All</button>
+  <button class="filter-chip" onclick="filterIdeas('content', this)">Content</button>
+  <button class="filter-chip" onclick="filterIdeas('business', this)">Business Dev</button>
+  <button class="filter-chip" onclick="filterIdeas('community', this)">Community</button>
+  <button class="filter-chip" onclick="filterIdeas('workshop', this)">Workshop</button>
+  <button class="filter-chip" onclick="filterIdeas('partnership', this)">Partnership</button>
+  <button class="filter-chip" onclick="filterIdeas('product', this)">Product</button>
+  <button class="filter-chip" onclick="filterIdeas('ops', this)">Ops</button>
+</div>
+
+<div class="ideas-container" id="ideasContainer">
+  <div class="empty-state" id="emptyState">
+    <div class="big-icon">✦</div>
+    <p>Your ideas are waiting to be born.</p>
+  </div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────
+const STORAGE_KEY = 'levelup_ideas_v3';
+const GDRIVE_FILE_ID = '13Kuy6ZFX-DjeTrej3VFsLVnv4ZLQtsjV';
+
+const SEED_IDEAS = [
+  {
+    id: 1779826469251,
+    text: "Course concept: Adaptability as a Teachable Skill\n\nThe old employee profile is obsolete. Traits like perfectionism — once prized — are liabilities in today's workforce. What organizations actually need now: people with growth mindsets who can move fast, experiment, and try things without needing certainty first.\n\nThe thesis: adaptability is a skill set, not a personality trait — and it can be trained.\n\nThis course would be built around retraining the workforce to:\n- Sit in discomfort and unfamiliarity without shutting down\n- Operate in spaces they haven't mastered yet\n- Become constant learners and constant evolvers\n- Experiment and iterate rather than perfect before acting\n\nBeyond individual skill-building, the course would also address organizational design — making the case that reward structures need to be reconfigured to actually incentivize adaptive behavior. You can't train people to embrace ambiguity if the system still punishes mistakes and rewards flawless execution.\n\nWorking title: \"Embracing Adaptability\" or \"The Adaptable Workforce.\" Strong candidate for a standalone program or as a module within a larger leadership curriculum.",
+    timestamp: "2026-05-26T12:00:00.000Z",
+    category: "product",
+    tags: ["adaptability course", "workforce retraining", "growth mindset"],
+    insight: "This could anchor an entirely new LevelUp product line — position it as the antidote to the 'perfectionism trap' and pitch it directly to L&D teams navigating AI disruption.",
+    processing: false
+  },
+  {
+    id: 1779826469252,
+    text: "Research concept: The Modern Workforce Diagnostic Study\n\nIdea: Ask leaders to nominate their top 5 highest-performing employees, then run a diagnostic across that group to identify the most common traits of people who thrive in today's workforce.\n\nConduct it like a real scientific study — rigorous methodology, meaningful sample size, and a proper readout report as the deliverable. Think: proprietary data LevelUp owns, not just anecdote.\n\nPossible outputs:\n- A published research report (thought leadership / PR play)\n- A \"Thriving Employee Profile\" framework that becomes LevelUp IP\n- A diagnostic tool organizations can license or use to assess their own teams\n- Data that directly backs and informs the Adaptability course concept\n\nThis could also be a strong partnership play — run it in collaboration with Salesforce, Bankrate, Angi, or other org partners as co-sponsors. Gives them something valuable (insight into their own top talent) while giving LevelUp proprietary research.\n\nWorking name: \"The Modern Employee Study\" or \"The Thriving at Work Report.\"",
+    timestamp: "2026-05-26T12:05:00.000Z",
+    category: "product",
+    tags: ["research study", "diagnostic tool", "thought leadership"],
+    insight: "Proprietary data is one of the most underleveraged assets a coaching firm can own — this study could become the foundation for LevelUp's entire IP library and give every future pitch a credibility anchor.",
+    processing: false
+  }
+];
+
+// ── State ─────────────────────────────────────────────────────
+let ideas = [];
+let activeFilter = 'all';
+
+// ── Storage: local first, Drive as backup ─────────────────────
+function loadIdeas() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      ideas = JSON.parse(stored);
+    } else {
+      // First ever open — seed with pre-loaded ideas
+      ideas = SEED_IDEAS;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
+    }
+  } catch(e) {
+    ideas = SEED_IDEAS;
+  }
+  document.getElementById('ideaCountDisplay').textContent = ideas.length;
+  renderAll();
+  // Try to sync from Drive in background (non-blocking)
+  syncFromDrive();
+}
+
+function saveIdeas() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
+  document.getElementById('ideaCountDisplay').textContent = ideas.length;
+  // Push to Drive in background
+  syncToDrive();
+}
+
+// ── Google Drive sync (background, non-blocking) ──────────────
+function setSyncStatus(msg, isError) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = isError ? '#E8A0A0' : 'rgba(232,196,196,0.7)';
+}
+
+async function syncFromDrive() {
+  setSyncStatus('↻ syncing…');
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 8000,
+        mcp_servers: [{ type: 'url', url: 'https://drivemcp.googleapis.com/mcp/v1', name: 'gdrive' }],
+        system: 'You have access to Google Drive. Download the file with the given ID and return ONLY its raw text content — no explanation, no preamble, just the raw file text.',
+        messages: [{ role: 'user', content: 'Download Google Drive file ID: ' + GDRIVE_FILE_ID + ' and return ONLY its raw text content.' }]
+      })
+    });
+
+    if (!resp.ok) throw new Error('API error ' + resp.status);
+    const data = await resp.json();
+
+    // Extract JSON from response — look in mcp_tool_result blocks first, then text
+    let raw = '';
+    for (const block of (data.content || [])) {
+      if (block.type === 'mcp_tool_result') {
+        const txt = (block.content?.[0]?.text || '').trim();
+        if (txt.startsWith('[')) { raw = txt; break; }
+      }
+    }
+    if (!raw) {
+      for (const block of (data.content || [])) {
+        if (block.type === 'text') {
+          const t = block.text.trim();
+          const i = t.indexOf('[');
+          if (i !== -1) { raw = t.slice(i); break; }
+        }
+      }
+    }
+
+    if (raw) {
+      const driveIdeas = JSON.parse(raw);
+      // Merge: Drive is source of truth; add any local-only ideas not yet in Drive
+      const driveIds = new Set(driveIdeas.map(i => i.id));
+      const localOnly = ideas.filter(i => !driveIds.has(i.id));
+      const merged = [...driveIdeas, ...localOnly].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      ideas = merged;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
+      document.getElementById('ideaCountDisplay').textContent = ideas.length;
+      renderAll();
+      setSyncStatus('✓ synced with Drive');
+      if (localOnly.length > 0) syncToDrive(); // push local-only ideas up
+    } else {
+      setSyncStatus('');
+    }
+  } catch(e) {
+    setSyncStatus('offline — saved locally', true);
+    console.warn('Drive sync error:', e);
+  }
+  setTimeout(() => setSyncStatus(''), 4000);
+}
+
+async function syncToDrive() {
+  try {
+    const payload = JSON.stringify(ideas);
+    await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        mcp_servers: [{ type: 'url', url: 'https://drivemcp.googleapis.com/mcp/v1', name: 'gdrive' }],
+        system: 'You have Google Drive access. When asked to update a file, use the Drive tools to update it with the exact content provided. Reply only with "saved".',
+        messages: [{ role: 'user', content: 'Update Google Drive file ID ' + GDRIVE_FILE_ID + ' with this exact content: ' + payload }]
+      })
+    });
+  } catch(e) {
+    console.warn('Drive save error:', e);
+  }
+}
+
+// ── Keyboard shortcut ─────────────────────────────────────────
+document.getElementById('ideaInput').addEventListener('keydown', function(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') captureIdea();
+});
+
+// ── Capture ───────────────────────────────────────────────────
+async function captureIdea() {
+  const input = document.getElementById('ideaInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const btn = document.getElementById('captureBtn');
+  btn.disabled = true;
+  btn.textContent = 'Thinking...';
+
+  const idea = {
+    id: Date.now(),
+    text: text,
+    timestamp: new Date().toISOString(),
+    category: null,
+    tags: [],
+    insight: null,
+    processing: true
+  };
+
+  ideas.unshift(idea);
+  saveIdeas();
+  input.value = '';
+  renderAll();
+
+  try {
+    const result = await classifyIdea(text);
+    const idx = ideas.findIndex(i => i.id === idea.id);
+    if (idx !== -1) {
+      ideas[idx].category = result.category;
+      ideas[idx].tags = result.tags;
+      ideas[idx].insight = result.insight;
+      ideas[idx].processing = false;
+      saveIdeas();
+      renderAll();
+    }
+  } catch(e) {
+    const idx = ideas.findIndex(i => i.id === idea.id);
+    if (idx !== -1) {
+      ideas[idx].category = 'other';
+      ideas[idx].tags = ['untagged'];
+      ideas[idx].processing = false;
+      saveIdeas();
+      renderAll();
+    }
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Capture Idea →';
+}
+
+async function classifyIdea(text) {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      system: `You are an assistant helping organize ideas for LevelUp Coaching & Training, a leadership development company.
+
+LevelUp's business context: deep organizational partnerships (leadership/culture work), accessible workshops and programs, a women's community (founding dinner end of May), and a Salesforce partnership. The founders are Tara (biz dev, content, client comms) and Lauren.
+
+Classify the idea into ONE primary category:
+- content: LinkedIn posts, articles, thought leadership, social content, email newsletters
+- business: business development, sales, client outreach, revenue, pricing, proposals
+- community: the women's community, founding dinner, membership, events
+- workshop: workshop design, facilitation, curriculum, workbooks, programs
+- partnership: Salesforce, Bankrate, Angi, corporate partnerships, ERGs
+- product: new offerings, services, programs to build
+- ops: internal operations, processes, systems, tools
+
+Also generate 1-3 short descriptive tags (2-4 words each) AND a brief one-sentence spark note.
+
+Respond ONLY with valid JSON, no preamble, no markdown:
+{"category":"<category>","tags":["tag1","tag2"],"insight":"<one sentence spark note>"}`,
+      messages: [{ role: "user", content: `Classify this LevelUp idea: "${text}"` }]
+    })
+  });
+
+  const data = await response.json();
+  const textContent = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+  const clean = textContent.replace(/```json|```/g, '').trim();
+  return JSON.parse(clean);
+}
+
+// ── Delete ────────────────────────────────────────────────────
+function deleteIdea(id) {
+  ideas = ideas.filter(i => i.id !== id);
+  saveIdeas();
+  renderAll();
+}
+
+// ── Filter ────────────────────────────────────────────────────
+function filterIdeas(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  renderAll();
+}
+
+// ── Render ────────────────────────────────────────────────────
+function renderAll() {
+  const container = document.getElementById('ideasContainer');
+  const filtered = activeFilter === 'all' ? ideas : ideas.filter(i => i.category === activeFilter);
+
+  if (filtered.length === 0) {
+    container.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'empty-state';
+    div.innerHTML = ideas.length > 0
+      ? '<div class="big-icon">◇</div><p>No ideas in this category yet.</p>'
+      : '<div class="big-icon">✦</div><p>Your ideas are waiting to be born.</p>';
+    container.appendChild(div);
+    return;
+  }
+
+  const groups = {};
+  filtered.forEach(idea => {
+    const label = formatDateLabel(new Date(idea.timestamp));
+    if (!groups[label]) groups[label] = [];
+    groups[label].push(idea);
+  });
+
+  container.innerHTML = '';
+  Object.entries(groups).forEach(([label, groupIdeas]) => {
+    const groupEl = document.createElement('div');
+    const groupLabel = document.createElement('div');
+    groupLabel.className = 'date-group-label';
+    groupLabel.textContent = label;
+    groupEl.appendChild(groupLabel);
+    groupIdeas.forEach(idea => groupEl.appendChild(renderCard(idea)));
+    container.appendChild(groupEl);
+  });
+}
+
+function renderCard(idea) {
+  const card = document.createElement('div');
+  card.className = 'idea-card' + (idea.processing ? ' processing' : '');
+  card.id = 'card-' + idea.id;
+
+  const tagHtml = (idea.tags || []).map(t =>
+    `<span class="tag tag-${idea.category || 'other'}">${escapeHtml(t)}</span>`
+  ).join('');
+
+  const insightHtml = idea.insight && !idea.processing
+    ? `<div class="ai-insight">✦ ${escapeHtml(idea.insight)}</div>` : '';
+
+  const metaRight = idea.processing
+    ? `<div class="spinner"></div><span class="processing-badge">tagging…</span>`
+    : `<button class="btn-delete" title="Remove" onclick="deleteIdea(${idea.id})">✕</button>`;
+
+  card.innerHTML = `
+    <div class="idea-left">
+      <div class="idea-text">${escapeHtml(idea.text)}</div>
+      <div class="idea-meta">
+        <span class="idea-time">${formatTime(idea.timestamp)}</span>
+        ${tagHtml}
+      </div>
+      ${insightHtml}
+    </div>
+    <div class="idea-right">${metaRight}</div>
+  `;
+  return card;
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatDateLabel(d) {
+  const today = new Date();
+  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+  if (isSameDay(d, today)) return 'Today';
+  if (isSameDay(d, yesterday)) return 'Yesterday';
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+function isSameDay(a, b) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function formatTime(iso) {
+  return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
+// ── Speech Recognition ────────────────────────────────────────
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let isListening = false;
+
+function initRecognition() {
+  if (!SpeechRecognition) return null;
+  const r = new SpeechRecognition();
+  r.continuous = true;
+  r.interimResults = true;
+  r.lang = 'en-US';
+  let finalTranscript = '';
+
+  r.onstart = () => {
+    isListening = true;
+    finalTranscript = document.getElementById('ideaInput').value;
+    updateMicUI(true);
+  };
+
+  r.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t;
+      else interim += t;
+    }
+    if (final) finalTranscript += (finalTranscript ? ' ' : '') + final;
+    const input = document.getElementById('ideaInput');
+    input.value = finalTranscript + (interim ? ' ' + interim : '');
+    input.scrollTop = input.scrollHeight;
+  };
+
+  r.onerror = (e) => {
+    const errEl = document.getElementById('speechError');
+    if (e.error === 'not-allowed') errEl.textContent = 'Microphone access denied. Please allow mic access in your browser settings.';
+    else if (e.error === 'no-speech') { errEl.textContent = 'No speech detected. Try again.'; setTimeout(() => errEl.style.display = 'none', 3000); }
+    else errEl.textContent = 'Speech error: ' + e.error;
+    errEl.style.display = 'block';
+    stopListening();
+  };
+
+  r.onend = () => {
+    if (isListening) { try { r.start(); } catch(e) { stopListening(); } }
+  };
+
+  return r;
+}
+
+function toggleMic() {
+  const errEl = document.getElementById('speechError');
+  errEl.style.display = 'none';
+  if (!SpeechRecognition) {
+    errEl.textContent = "Speech recognition isn't supported in this browser. Try Chrome or Edge.";
+    errEl.style.display = 'block';
+    return;
+  }
+  isListening ? stopListening() : startListening();
+}
+
+function startListening() {
+  recognition = initRecognition();
+  if (!recognition) return;
+  isListening = true;
+  try { recognition.start(); } catch(e) { console.warn(e); }
+}
+
+function stopListening() {
+  isListening = false;
+  if (recognition) { try { recognition.stop(); } catch(e) {} recognition = null; }
+  updateMicUI(false);
+}
+
+function updateMicUI(listening) {
+  const btn = document.getElementById('micBtn');
+  const label = document.getElementById('micLabel');
+  if (listening) { btn.classList.add('listening'); label.textContent = 'Stop'; }
+  else { btn.classList.remove('listening'); label.textContent = 'Speak'; }
+}
+
+// ── Init ──────────────────────────────────────────────────────
+loadIdeas();
+</script>
+</body>
+</html>
