@@ -79,7 +79,8 @@
   .tag { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
   .tag-content     { background: #EFF4C4; color: #5A6A00; }
   .tag-business    { background: #F5E0E0; color: #7A1525; }
-  .tag-community   { background: #E8E0F5; color: #4A2080; }
+  .tag-levelup_women { background: #F5E0F0; color: #7A1060; }
+  .tag-yycpto        { background: #FDE8D8; color: #8B3A0A; }
   .tag-workshop    { background: #E0EFF5; color: #0A4A6A; }
   .tag-partnership { background: #E0F5EC; color: #0A5A30; }
   .tag-product     { background: #FFF0D8; color: #7A4000; }
@@ -138,7 +139,8 @@
   <button class="filter-chip active" onclick="filterIdeas('all', this)">All</button>
   <button class="filter-chip" onclick="filterIdeas('content', this)">Content</button>
   <button class="filter-chip" onclick="filterIdeas('business', this)">Business Dev</button>
-  <button class="filter-chip" onclick="filterIdeas('community', this)">Community</button>
+  <button class="filter-chip" onclick="filterIdeas('levelup_women', this)">LevelUp Women</button>
+  <button class="filter-chip" onclick="filterIdeas('yycpto', this)">YYCPTO</button>
   <button class="filter-chip" onclick="filterIdeas('workshop', this)">Workshop</button>
   <button class="filter-chip" onclick="filterIdeas('partnership', this)">Partnership</button>
   <button class="filter-chip" onclick="filterIdeas('product', this)">Product</button>
@@ -197,18 +199,59 @@ if (!authorName) {
 
 // ── Keyword classifier (no API needed) ───────────────────────
 const RULES = [
-  { category: 'content',     keywords: ['linkedin','post','article','newsletter','write','blog','caption','email blast','thought leadership','social','content','publish','substack'] },
-  { category: 'community',   keywords: ['women','community','dinner','founding','member','club','network','gathering','event','invite','cohort','intimate'] },
-  { category: 'workshop',    keywords: ['workshop','facilitat','curriculum','workbook','session','training','program','module','course','teach','learn','slides','activity','framework'] },
-  { category: 'partnership', keywords: ['salesforce','bankrate','angi','mcdonald','partner','erg','corporate','sponsor','client','enterprise','collaboration'] },
-  { category: 'business',    keywords: ['revenue','pitch','proposal','sales','price','pricing','outreach','prospect','bd','business dev','contract','deal','invoice','close'] },
-  { category: 'product',     keywords: ['build','create','launch','product','offering','service','tool','platform','diagnostic','assessment','new program','develop'] },
-  { category: 'ops',         keywords: ['process','system','tool','automate','template','internal','admin','workflow','organize','track','crm','notion','slack'] },
+  { category: 'content', keywords: [
+    'linkedin','post','article','newsletter','write','blog','caption','email blast',
+    'thought leadership','social','content','publish','substack','series','challenge',
+    '30 day','30-day','weekly','daily','reel','video','story','stories','carousel',
+    'caption','hook','headline','share','audience','followers','engagement','campaign',
+    'brand voice','messaging','announcement','launch post','tip','tips','quote',
+    'insight','thread','poll','podcast','interview','feature','press','pr'
+  ]},
+  { category: 'levelup_women', keywords: [
+    'women','community','dinner','founding','member','club','network','gathering',
+    'event','invite','cohort','intimate','circle','collective','group','meetup',
+    'happy hour','retreat','offline','connection','relationship','peer','belong',
+    'levelup women','women's community','women's club','ladies','female','gender'
+  ]},
+  { category: 'yycpto', keywords: [
+    'yes you can pull that off','yycpto','pull that off','pull it off',
+    'outfit','style','wear','dress','fashion','look','appearance','confidence',
+    'professional image','personal brand','wardrobe','attire','dress code',
+    'presentation','first impression','image','what to wear','styling'
+  ]},
+  { category: 'workshop', keywords: [
+    'workshop','facilitat','curriculum','workbook','session','training','program',
+    'module','course','teach','learn','slides','activity','framework','exercise',
+    'debrief','breakout','cohort','cohort-based','live session','virtual','in person',
+    'keynote','talk','speak','presentation','agenda','curriculum','lesson','skill'
+  ]},
+  { category: 'partnership', keywords: [
+    'salesforce','bankrate','angi','mcdonald','partner','erg','corporate','sponsor',
+    'client','enterprise','collaboration','account','relationship','renewal','expand',
+    'upsell','cross-sell','intro','referral','co-brand','joint','ally','strategic'
+  ]},
+  { category: 'business', keywords: [
+    'revenue','pitch','proposal','sales','price','pricing','outreach','prospect',
+    'bd','business dev','contract','deal','invoice','close','lead','pipeline',
+    'quota','target','goal','grow','scale','acquire','convert','follow up',
+    'cold','warm','meeting request','deck','scope','fee','rate','budget','roi'
+  ]},
+  { category: 'product', keywords: [
+    'build','create','launch','product','offering','service','tool','platform',
+    'diagnostic','assessment','new program','develop','design','prototype','mvp',
+    'test','pilot','beta','feature','roadmap','package','bundle','tier','subscription'
+  ]},
+  { category: 'ops', keywords: [
+    'process','system','automate','template','internal','admin','workflow','organize',
+    'track','crm','notion','slack','ops','operations','infrastructure','setup',
+    'onboard','offboard','checklist','sop','document','file','folder','manage'
+  ]},
 ];
 
 const INSIGHTS = {
   content:     "Strong content ideas compound over time — consider batching this into a series.",
-  community:   "Community touchpoints are LevelUp's highest-trust channel — lean in.",
+  levelup_women: "The women's community is LevelUp's highest-trust channel — lean in.",
+  yycpto:      "YYCPTO content tends to travel well — consider whether this idea has a social or workshop version too.",
   workshop:    "Could this become a repeatable module in an existing LevelUp program?",
   partnership: "Partner ideas move faster when there's a clear co-benefit to name upfront.",
   business:    "What's the one-line pitch version of this that opens a door?",
