@@ -121,6 +121,20 @@
   <div class="capture-inner">
     <div class="capture-label">What's on your mind?</div>
     <textarea id="ideaInput" rows="3" placeholder="Dump it here — content idea, business thought, community concept, random spark… just get it out."></textarea>
+    <div style="margin-top:10px;">
+      <select id="categorySelect" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);background:var(--blush-light);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'8\' viewBox=\'0 0 12 8\'><path d=\'M1 1l5 5 5-5\' stroke=\'%236B1A2A\' stroke-width=\'2\' fill=\'none\'/></svg>');background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;">
+        <option value="">Select a category…</option>
+        <option value="content">Content</option>
+        <option value="business">Business Dev</option>
+        <option value="levelup_women">LevelUp Women</option>
+        <option value="yycpto">YYCPTO</option>
+        <option value="workshop">Workshop</option>
+        <option value="partnership">Partnership</option>
+        <option value="product">Product</option>
+        <option value="ops">Ops</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
     <div class="capture-actions">
       <span class="char-hint">Press ⌘↵ to capture · or speak</span>
       <div class="btn-row">
@@ -353,8 +367,13 @@ async function captureIdea() {
   btn.disabled = true;
   btn.textContent = 'Saving...';
 
-  // Classify instantly (no API)
-  const { category, tags, insight } = classifyIdea(text);
+  const select = document.getElementById('categorySelect');
+  const category = select.value || 'other';
+  const categoryLabels = {
+    content: 'Content', business: 'Business Dev', levelup_women: 'LevelUp Women',
+    yycpto: 'YYCPTO', workshop: 'Workshop', partnership: 'Partnership',
+    product: 'Product', ops: 'Ops', other: 'Other'
+  };
 
   const idea = {
     id: Date.now(),
@@ -362,8 +381,8 @@ async function captureIdea() {
     text,
     timestamp: new Date().toISOString(),
     category,
-    tags,
-    insight,
+    tags: [categoryLabels[category] || category],
+    insight: INSIGHTS[category] || INSIGHTS.other,
     processing: false
   };
 
@@ -378,6 +397,7 @@ async function captureIdea() {
 
   ideas.unshift(idea);
   input.value = '';
+  document.getElementById('categorySelect').value = '';
   await saveToBin();
   renderAll();
 
