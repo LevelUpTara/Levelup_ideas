@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LevelUp Ideas</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --crimson: #6B1A2A;
+    --crimson-deep: #4A0F1C;
+    --blush: #E8C4C4;
+    --blush-light: #F5E8E8;
+    --chartreuse: #C8D44E;
+    --cream: #FAF6F1;
+    --text: #2A1A1F;
+    --text-muted: #7A5A62;
+    --border: rgba(107,26,42,0.12);
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
+
+  .header {
+    background: var(--crimson-deep);
+    padding: 28px 40px 24px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    border-bottom: 3px solid var(--chartreuse);
+  }
+  .header-left h1 { font-family: 'Playfair Display', serif; font-size: 1.9rem; color: var(--blush-light); letter-spacing: 0.01em; line-height: 1; }
+  .header-left h1 span { color: var(--chartreuse); }
+  .header-left p { font-size: 0.78rem; color: var(--blush); margin-top: 5px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 300; }
+  .idea-count { font-family: 'Playfair Display', serif; font-size: 2.4rem; color: var(--chartreuse); line-height: 1; text-align: right; }
+  .idea-count-label { font-size: 0.7rem; color: var(--blush); text-transform: uppercase; letter-spacing: 0.1em; text-align: right; margin-top: 2px; }
+  #syncStatus { font-size: 0.68rem; color: rgba(232,196,196,0.8); margin-top: 4px; min-height: 14px; text-align: right; }
+
+  .capture-zone { padding: 28px 40px; background: white; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 20px rgba(107,26,42,0.07); }
+  .capture-inner { max-width: 820px; margin: 0 auto; }
+  .capture-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 10px; font-weight: 500; }
+  textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 16px 18px; font-family: 'DM Sans', sans-serif; font-size: 1rem; color: var(--text); resize: none; background: var(--blush-light); transition: border-color 0.2s, box-shadow 0.2s; outline: none; line-height: 1.6; }
+  textarea:focus { border-color: var(--crimson); box-shadow: 0 0 0 3px rgba(107,26,42,0.08); background: white; }
+  textarea::placeholder { color: #B8929A; font-style: italic; }
+
+  .capture-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+  .char-hint { font-size: 0.75rem; color: var(--text-muted); }
+  .btn-row { display: flex; gap: 8px; align-items: center; }
+
+  .btn-capture { background: var(--crimson); color: white; border: none; padding: 10px 24px; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: background 0.15s, transform 0.1s; letter-spacing: 0.02em; }
+  .btn-capture:hover { background: var(--crimson-deep); }
+  .btn-capture:active { transform: scale(0.98); }
+  .btn-capture:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-mic { background: none; border: 1.5px solid var(--border); border-radius: 6px; padding: 9px 14px; cursor: pointer; color: var(--text-muted); transition: all 0.15s; display: flex; align-items: center; gap: 7px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; }
+  .btn-mic:hover { border-color: var(--crimson); color: var(--crimson); }
+  .btn-mic.listening { background: var(--crimson); border-color: var(--crimson); color: white; animation: micPulse 1.4s ease-in-out infinite; }
+  @keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(107,26,42,0.4); } 50% { box-shadow: 0 0 0 6px rgba(107,26,42,0); } }
+  .no-speech-msg { font-size: 0.75rem; color: #B85050; margin-top: 6px; display: none; }
+
+  .filter-bar { padding: 16px 40px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 900px; margin: 0 auto; }
+  .filter-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-right: 4px; font-weight: 500; }
+  .filter-chip { padding: 5px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: white; font-size: 0.78rem; color: var(--text-muted); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+  .filter-chip:hover { border-color: var(--crimson); color: var(--crimson); }
+  .filter-chip.active { background: var(--crimson); border-color: var(--crimson); color: white; font-weight: 500; }
+
+  .ideas-container { padding: 0 40px 60px; max-width: 900px; margin: 0 auto; }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+  .empty-state .big-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.4; }
+  .empty-state p { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.1rem; }
+
+  .idea-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; margin-bottom: 12px; display: flex; gap: 16px; align-items: flex-start; transition: box-shadow 0.15s, transform 0.15s; animation: slideIn 0.25s ease; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+  .idea-card:hover { box-shadow: 0 4px 20px rgba(107,26,42,0.09); transform: translateY(-1px); }
+  .idea-left { flex: 1; min-width: 0; }
+  .idea-text { font-size: 0.97rem; line-height: 1.65; color: var(--text); margin-bottom: 12px; white-space: pre-wrap; }
+  .idea-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .idea-time { font-size: 0.72rem; color: var(--text-muted); }
+  .idea-author { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
+
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+  .tag-content     { background: #EFF4C4; color: #5A6A00; }
+  .tag-business    { background: #F5E0E0; color: #7A1525; }
+  .tag-community   { background: #E8E0F5; color: #4A2080; }
+  .tag-workshop    { background: #E0EFF5; color: #0A4A6A; }
+  .tag-partnership { background: #E0F5EC; color: #0A5A30; }
+  .tag-product     { background: #FFF0D8; color: #7A4000; }
+  .tag-ops         { background: #F0F0F0; color: #444; }
+  .tag-other       { background: #F5E8E8; color: #6B4040; }
+
+  .ai-insight { margin-top: 10px; padding: 9px 13px; background: var(--blush-light); border-left: 3px solid var(--crimson); border-radius: 0 6px 6px 0; font-size: 0.83rem; color: var(--crimson-deep); font-style: italic; line-height: 1.5; }
+  .idea-right { display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 2px; }
+  .btn-delete { background: none; border: none; cursor: pointer; color: #C8A0A8; font-size: 1rem; padding: 4px; border-radius: 4px; transition: color 0.15s; line-height: 1; }
+  .btn-delete:hover { color: var(--crimson); }
+  .spinner { width: 14px; height: 14px; border: 2px solid var(--blush); border-top-color: var(--crimson); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .processing-badge { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .date-group-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); font-weight: 500; padding: 20px 0 8px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+
+  @media (max-width: 600px) {
+    .header, .capture-zone, .filter-bar, .ideas-container { padding-left: 20px; padding-right: 20px; }
+    .header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .char-hint { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Level<span>Up</span> Ideas</h1>
+    <p>Capture · Organize · Build</p>
+  </div>
+  <div>
+    <div class="idea-count" id="ideaCountDisplay">0</div>
+    <div class="idea-count-label">ideas captured</div>
+    <div id="syncStatus"></div>
+  </div>
+</div>
+
+<div class="capture-zone">
+  <div class="capture-inner">
+    <div class="capture-label">What's on your mind?</div>
+    <textarea id="ideaInput" rows="3" placeholder="Dump it here — content idea, business thought, community concept, random spark… just get it out."></textarea>
+    <div class="capture-actions">
+      <span class="char-hint">Press ⌘↵ to capture · or speak</span>
+      <div class="btn-row">
+        <button class="btn-mic" id="micBtn" onclick="toggleMic()">
+          <span>🎙</span><span id="micLabel">Speak</span>
+        </button>
+        <button class="btn-capture" id="captureBtn" onclick="captureIdea()">Capture Idea →</button>
+      </div>
+    </div>
+    <div id="speechError" class="no-speech-msg"></div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Filter:</span>
+  <button class="filter-chip active" onclick="filterIdeas('all', this)">All</button>
+  <button class="filter-chip" onclick="filterIdeas('content', this)">Content</button>
+  <button class="filter-chip" onclick="filterIdeas('business', this)">Business Dev</button>
+  <button class="filter-chip" onclick="filterIdeas('community', this)">Community</button>
+  <button class="filter-chip" onclick="filterIdeas('workshop', this)">Workshop</button>
+  <button class="filter-chip" onclick="filterIdeas('partnership', this)">Partnership</button>
+  <button class="filter-chip" onclick="filterIdeas('product', this)">Product</button>
+  <button class="filter-chip" onclick="filterIdeas('ops', this)">Ops</button>
+</div>
+
+<div class="ideas-container" id="ideasContainer">
+  <div class="empty-state">
+    <div class="big-icon">✦</div>
+    <p>Your ideas are waiting to be born.</p>
+  </div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────
+// JSONBin: free shared JSON storage, no backend needed
+// JSONBin config
+const BIN_ID  = '6a16f8608ef04f4538217054';
+const BIN_KEY = '$2a$10$NgwbRbXPWk0Ye/pA/JKoyeuYPmoVFE8cGDjw5QwrxlyinBGVZ6iou';
+const BIN_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
+
+const SEED_IDEAS = [
+  {
+    id: 1779826469251,
+    author: 'Tara',
+    text: "Course concept: Adaptability as a Teachable Skill\n\nThe old employee profile is obsolete. Traits like perfectionism — once prized — are liabilities in today's workforce. What organizations actually need now: people with growth mindsets who can move fast, experiment, and try things without needing certainty first.\n\nThe thesis: adaptability is a skill set, not a personality trait — and it can be trained.\n\nThis course would be built around retraining the workforce to:\n- Sit in discomfort and unfamiliarity without shutting down\n- Operate in spaces they haven't mastered yet\n- Become constant learners and constant evolvers\n- Experiment and iterate rather than perfect before acting\n\nBeyond individual skill-building, the course would also address organizational design — making the case that reward structures need to be reconfigured to actually incentivize adaptive behavior. You can't train people to embrace ambiguity if the system still punishes mistakes and rewards flawless execution.\n\nWorking title: \"Embracing Adaptability\" or \"The Adaptable Workforce.\"",
+    timestamp: '2026-05-26T12:00:00.000Z',
+    category: 'product',
+    tags: ['adaptability course', 'workforce retraining', 'growth mindset'],
+    insight: "This could anchor an entirely new LevelUp product line — position it as the antidote to the 'perfectionism trap' and pitch it directly to L&D teams navigating AI disruption.",
+    processing: false
+  },
+  {
+    id: 1779826469252,
+    author: 'Tara',
+    text: "Research concept: The Modern Workforce Diagnostic Study\n\nIdea: Ask leaders to nominate their top 5 highest-performing employees, then run a diagnostic across that group to identify the most common traits of people who thrive in today's workforce.\n\nConduct it like a real scientific study — rigorous methodology, meaningful sample size, and a proper readout report as the deliverable. Think: proprietary data LevelUp owns, not just anecdote.\n\nPossible outputs:\n- A published research report (thought leadership / PR play)\n- A \"Thriving Employee Profile\" framework that becomes LevelUp IP\n- A diagnostic tool organizations can license or use to assess their own teams\n- Data that directly backs and informs the Adaptability course concept\n\nThis could also be a strong partnership play — run it in collaboration with Salesforce, Bankrate, Angi, or other org partners as co-sponsors.\n\nWorking name: \"The Modern Employee Study\" or \"The Thriving at Work Report.\"",
+    timestamp: '2026-05-26T12:05:00.000Z',
+    category: 'product',
+    tags: ['research study', 'diagnostic tool', 'thought leadership'],
+    insight: "Proprietary data is one of the most underleveraged assets a coaching firm can own — this study could become the foundation for LevelUp's entire IP library and give every future pitch a credibility anchor.",
+    processing: false
+  }
+];
+
+// ── State ─────────────────────────────────────────────────────
+let ideas = [];
+let activeFilter = 'all';
+let authorName = localStorage.getItem('lu_author') || '';
+
+// Ask for name on first use
+if (!authorName) {
+  const name = prompt("What's your name? (So ideas show who added them)") || 'Anonymous';
+  authorName = name.trim();
+  localStorage.setItem('lu_author', authorName);
+}
+
+// ── Keyword classifier (no API needed) ───────────────────────
+const RULES = [
+  { category: 'content',     keywords: ['linkedin','post','article','newsletter','write','blog','caption','email blast','thought leadership','social','content','publish','substack'] },
+  { category: 'community',   keywords: ['women','community','dinner','founding','member','club','network','gathering','event','invite','cohort','intimate'] },
+  { category: 'workshop',    keywords: ['workshop','facilitat','curriculum','workbook','session','training','program','module','course','teach','learn','slides','activity','framework'] },
+  { category: 'partnership', keywords: ['salesforce','bankrate','angi','mcdonald','partner','erg','corporate','sponsor','client','enterprise','collaboration'] },
+  { category: 'business',    keywords: ['revenue','pitch','proposal','sales','price','pricing','outreach','prospect','bd','business dev','contract','deal','invoice','close'] },
+  { category: 'product',     keywords: ['build','create','launch','product','offering','service','tool','platform','diagnostic','assessment','new program','develop'] },
+  { category: 'ops',         keywords: ['process','system','tool','automate','template','internal','admin','workflow','organize','track','crm','notion','slack'] },
+];
+
+const INSIGHTS = {
+  content:     "Strong content ideas compound over time — consider batching this into a series.",
+  community:   "Community touchpoints are LevelUp's highest-trust channel — lean in.",
+  workshop:    "Could this become a repeatable module in an existing LevelUp program?",
+  partnership: "Partner ideas move faster when there's a clear co-benefit to name upfront.",
+  business:    "What's the one-line pitch version of this that opens a door?",
+  product:     "New offerings are most fundable when they solve a pain that existing clients have already named.",
+  ops:         "Ops improvements that save time compound across every future project.",
+  other:       "Worth revisiting — every big idea starts as a rough one.",
+};
+
+function classifyIdea(text) {
+  const lower = text.toLowerCase();
+  const scores = {};
+  for (const rule of RULES) {
+    let score = 0;
+    for (const kw of rule.keywords) {
+      if (lower.includes(kw)) score++;
+    }
+    if (score > 0) scores[rule.category] = score;
+  }
+  const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
+  const category = sorted.length > 0 ? sorted[0][0] : 'other';
+
+  // Pick top matching keywords as tags
+  const rule = RULES.find(r => r.category === category);
+  const tags = rule
+    ? rule.keywords.filter(kw => lower.includes(kw)).slice(0, 3)
+    : [];
+
+  return {
+    category,
+    tags: tags.length > 0 ? tags : [category],
+    insight: INSIGHTS[category] || INSIGHTS.other
+  };
+}
+
+// ── JSONBin sync ──────────────────────────────────────────────
+function setSyncStatus(msg, isError) {
+  const el = document.getElementById('syncStatus');
+  if (el) { el.textContent = msg; el.style.color = isError ? '#E8A0A0' : 'rgba(232,196,196,0.8)'; }
+}
+
+async function loadFromBin() {
+  setSyncStatus('↻ syncing…');
+  try {
+    const resp = await fetch(BIN_URL + '/latest', {
+      headers: { 'X-Master-Key': BIN_KEY }
+    });
+    if (!resp.ok) throw new Error('fetch failed');
+    const data = await resp.json();
+    const record = data.record || {}; const remote = Array.isArray(record) ? record : (record.ideas || []);
+    if (remote.length === 0) {
+      // First ever load — push seed ideas
+      ideas = SEED_IDEAS;
+      await saveToBin();
+    } else {
+      ideas = remote;
+    }
+    localStorage.setItem('lu_backup', JSON.stringify(ideas));
+    setSyncStatus('✓ synced');
+    setTimeout(() => setSyncStatus(''), 3000);
+  } catch(e) {
+    // Fall back to local
+    const backup = localStorage.getItem('lu_backup');
+    ideas = backup ? JSON.parse(backup) : SEED_IDEAS;
+    setSyncStatus('offline — local copy', true);
+    setTimeout(() => setSyncStatus(''), 4000);
+  }
+  document.getElementById('ideaCountDisplay').textContent = ideas.length;
+  renderAll();
+}
+
+async function saveToBin() {
+  localStorage.setItem('lu_backup', JSON.stringify(ideas));
+  document.getElementById('ideaCountDisplay').textContent = ideas.length;
+  try {
+    await fetch(BIN_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': BIN_KEY },
+      body: JSON.stringify({ ideas: ideas })
+    });
+  } catch(e) {
+    console.warn('Save to bin failed, saved locally only');
+  }
+}
+
+// ── Keyboard shortcut ─────────────────────────────────────────
+document.getElementById('ideaInput').addEventListener('keydown', function(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') captureIdea();
+});
+
+// ── Capture ───────────────────────────────────────────────────
+async function captureIdea() {
+  const input = document.getElementById('ideaInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (isListening) stopListening();
+
+  const btn = document.getElementById('captureBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  // Classify instantly (no API)
+  const { category, tags, insight } = classifyIdea(text);
+
+  const idea = {
+    id: Date.now(),
+    author: authorName,
+    text,
+    timestamp: new Date().toISOString(),
+    category,
+    tags,
+    insight,
+    processing: false
+  };
+
+  // Re-fetch latest first to avoid overwriting Lauren's ideas
+  try {
+    const resp = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': BIN_KEY } });
+    if (resp.ok) {
+      const data = await resp.json();
+      const rec = data.record || {}; ideas = Array.isArray(rec) ? rec : (rec.ideas || ideas);
+    }
+  } catch(e) {}
+
+  ideas.unshift(idea);
+  input.value = '';
+  await saveToBin();
+  renderAll();
+
+  btn.disabled = false;
+  btn.textContent = 'Capture Idea →';
+}
+
+// ── Delete ────────────────────────────────────────────────────
+async function deleteIdea(id) {
+  ideas = ideas.filter(i => i.id !== id);
+  await saveToBin();
+  renderAll();
+}
+
+// ── Filter ────────────────────────────────────────────────────
+function filterIdeas(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  renderAll();
+}
+
+// ── Render ────────────────────────────────────────────────────
+function renderAll() {
+  const container = document.getElementById('ideasContainer');
+  const filtered = activeFilter === 'all' ? ideas : ideas.filter(i => i.category === activeFilter);
+
+  if (filtered.length === 0) {
+    container.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'empty-state';
+    div.innerHTML = ideas.length > 0
+      ? '<div class="big-icon">◇</div><p>No ideas in this category yet.</p>'
+      : '<div class="big-icon">✦</div><p>Your ideas are waiting to be born.</p>';
+    container.appendChild(div);
+    return;
+  }
+
+  const groups = {};
+  filtered.forEach(idea => {
+    const label = formatDateLabel(new Date(idea.timestamp));
+    if (!groups[label]) groups[label] = [];
+    groups[label].push(idea);
+  });
+
+  container.innerHTML = '';
+  Object.entries(groups).forEach(([label, groupIdeas]) => {
+    const groupEl = document.createElement('div');
+    const lbl = document.createElement('div');
+    lbl.className = 'date-group-label';
+    lbl.textContent = label;
+    groupEl.appendChild(lbl);
+    groupIdeas.forEach(idea => groupEl.appendChild(renderCard(idea)));
+    container.appendChild(groupEl);
+  });
+}
+
+function renderCard(idea) {
+  const card = document.createElement('div');
+  card.className = 'idea-card';
+
+  const tagHtml = (idea.tags || []).map(t =>
+    `<span class="tag tag-${idea.category || 'other'}">${escapeHtml(t)}</span>`
+  ).join('');
+
+  const insightHtml = idea.insight
+    ? `<div class="ai-insight">✦ ${escapeHtml(idea.insight)}</div>` : '';
+
+  const authorHtml = idea.author
+    ? `<span class="idea-author">— ${escapeHtml(idea.author)}</span>` : '';
+
+  card.innerHTML = `
+    <div class="idea-left">
+      <div class="idea-text">${escapeHtml(idea.text)}</div>
+      <div class="idea-meta">
+        <span class="idea-time">${formatTime(idea.timestamp)}</span>
+        ${authorHtml}
+        ${tagHtml}
+      </div>
+      ${insightHtml}
+    </div>
+    <div class="idea-right">
+      <button class="btn-delete" onclick="deleteIdea(${idea.id})">✕</button>
+    </div>
+  `;
+  return card;
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatDateLabel(d) {
+  const today = new Date(), yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  if (isSameDay(d, today)) return 'Today';
+  if (isSameDay(d, yesterday)) return 'Yesterday';
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+function isSameDay(a, b) {
+  return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+}
+
+function formatTime(iso) {
+  return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
+// ── First-time Setup ─────────────────────────────────────────
+function showSetup() {
+  const container = document.getElementById('ideasContainer');
+  container.innerHTML = `
+    <div style="max-width:520px;margin:40px auto;background:white;border-radius:12px;padding:32px;border:1px solid var(--border);">
+      <h2 style="font-family:'Playfair Display',serif;color:var(--crimson-deep);margin-bottom:8px;">One-time Setup</h2>
+      <p style="font-size:0.9rem;color:var(--text-muted);line-height:1.6;margin-bottom:24px;">
+        To sync ideas between you and Lauren, you need a free <strong>JSONBin</strong> account. Takes 60 seconds:
+      </p>
+      <ol style="font-size:0.88rem;line-height:2;color:var(--text);padding-left:20px;margin-bottom:24px;">
+        <li>Go to <a href="https://jsonbin.io" target="_blank" style="color:var(--crimson);">jsonbin.io</a> → Sign Up (free)</li>
+        <li>After logging in, go to <strong>API Keys</strong> in the sidebar</li>
+        <li>Copy your <strong>Secret Key</strong></li>
+        <li>Click <strong>Bins</strong> → <strong>Create Bin</strong> → paste <code style="background:var(--blush-light);padding:2px 6px;border-radius:4px;">[]</code> as content → Save</li>
+        <li>Copy the <strong>Bin ID</strong> from the URL or bin details</li>
+      </ol>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div>
+          <label style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);display:block;margin-bottom:4px;">Bin ID</label>
+          <input id="setupBinId" type="text" placeholder="e.g. 64a1b2c3d4e5f6..." style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;" />
+        </div>
+        <div>
+          <label style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);display:block;margin-bottom:4px;">Secret Key</label>
+          <input id="setupBinKey" type="text" placeholder="\$2a\$10\$..." style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;" />
+        </div>
+        <button onclick="saveSetup()" style="background:var(--crimson);color:white;border:none;padding:12px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;margin-top:4px;">Save & Connect →</button>
+        <p id="setupError" style="color:#B85050;font-size:0.8rem;display:none;"></p>
+      </div>
+    </div>`;
+}
+
+async function saveSetup() {
+  const binId = document.getElementById('setupBinId').value.trim();
+  const binKey = document.getElementById('setupBinKey').value.trim();
+  const errEl = document.getElementById('setupError');
+
+  if (!binId || !binKey) {
+    errEl.textContent = 'Please fill in both fields.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Test the connection
+  try {
+    const resp = await fetch('https://api.jsonbin.io/v3/b/' + binId + '/latest', {
+      headers: { 'X-Master-Key': binKey }
+    });
+    if (!resp.ok) throw new Error('Invalid credentials');
+    localStorage.setItem('lu_bin_id', binId);
+    localStorage.setItem('lu_bin_key', binKey);
+    BIN_ID = binId;
+    BIN_KEY = binKey;
+    BIN_URL = 'https://api.jsonbin.io/v3/b/' + binId;
+    loadFromBin();
+  } catch(e) {
+    errEl.textContent = 'Could not connect — double-check your Bin ID and Secret Key.';
+    errEl.style.display = 'block';
+  }
+}
+
+// ── Speech Recognition ────────────────────────────────────────
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let isListening = false;
+
+function toggleMic() {
+  const errEl = document.getElementById('speechError');
+  errEl.style.display = 'none';
+  if (!SpeechRecognition) {
+    errEl.textContent = "Speech recognition isn't supported here. Try Safari on iPhone or Chrome on desktop.";
+    errEl.style.display = 'block';
+    return;
+  }
+  isListening ? stopListening() : startListening();
+}
+
+function startListening() {
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+  let finalTranscript = '';
+
+  recognition.onstart = () => { isListening = true; finalTranscript = document.getElementById('ideaInput').value; updateMicUI(true); };
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t; else interim += t;
+    }
+    if (final) finalTranscript += (finalTranscript ? ' ' : '') + final;
+    const input = document.getElementById('ideaInput');
+    input.value = finalTranscript + (interim ? ' ' + interim : '');
+    input.scrollTop = input.scrollHeight;
+  };
+  recognition.onerror = (e) => {
+    const errEl = document.getElementById('speechError');
+    errEl.textContent = e.error === 'not-allowed' ? 'Mic access denied — check browser settings.' : 'Speech error: ' + e.error;
+    errEl.style.display = 'block';
+    stopListening();
+  };
+  recognition.onend = () => { if (isListening) { try { recognition.start(); } catch(e) { stopListening(); } } };
+  try { recognition.start(); } catch(e) { console.warn(e); }
+}
+
+function stopListening() {
+  isListening = false;
+  if (recognition) { try { recognition.stop(); } catch(e) {} recognition = null; }
+  updateMicUI(false);
+}
+
+function updateMicUI(on) {
+  document.getElementById('micBtn').classList.toggle('listening', on);
+  document.getElementById('micLabel').textContent = on ? 'Stop' : 'Speak';
+}
+
+// ── Auto-refresh every 30s to pick up the other person's ideas ─
+setInterval(async () => {
+  try {
+    const resp = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': BIN_KEY } });
+    if (resp.ok) {
+      const data = await resp.json();
+      const record = data.record || {}; const remote = Array.isArray(record) ? record : (record.ideas || []);
+      if (remote.length !== ideas.length) {
+        ideas = remote;
+        localStorage.setItem('lu_backup', JSON.stringify(ideas));
+        document.getElementById('ideaCountDisplay').textContent = ideas.length;
+        renderAll();
+        setSyncStatus('✓ new ideas loaded');
+        setTimeout(() => setSyncStatus(''), 3000);
+      }
+    }
+  } catch(e) {}
+}, 30000);
+
+// ── Init ──────────────────────────────────────────────────────
+loadFromBin();
+</script>
+</body>
+</html>
