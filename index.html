@@ -257,7 +257,7 @@ async function loadFromBin() {
     });
     if (!resp.ok) throw new Error('fetch failed');
     const data = await resp.json();
-    const remote = data.record?.ideas || data.record || [];
+    const record = data.record || {}; const remote = Array.isArray(record) ? record : (record.ideas || []);
     if (remote.length === 0) {
       // First ever load — push seed ideas
       ideas = SEED_IDEAS;
@@ -329,7 +329,7 @@ async function captureIdea() {
     const resp = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': BIN_KEY } });
     if (resp.ok) {
       const data = await resp.json();
-      ideas = data.record || ideas;
+      const rec = data.record || {}; ideas = Array.isArray(rec) ? rec : (rec.ideas || ideas);
     }
   } catch(e) {}
 
@@ -565,7 +565,7 @@ setInterval(async () => {
     const resp = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': BIN_KEY } });
     if (resp.ok) {
       const data = await resp.json();
-      const remote = data.record?.ideas || data.record || [];
+      const record = data.record || {}; const remote = Array.isArray(record) ? record : (record.ideas || []);
       if (remote.length !== ideas.length) {
         ideas = remote;
         localStorage.setItem('lu_backup', JSON.stringify(ideas));
